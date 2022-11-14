@@ -15,6 +15,7 @@ let time = 0;           // Global simulation time in days
 let speed = 1;     // Speed (how many days added to time on each render pass
 let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let animation = true;   // Animation is running
+let projectionState = 1;
 
 const VP_DISTANCE = 4;
 
@@ -28,8 +29,6 @@ function setup(shaders)
     let program = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
 
     let mProjection = ortho(-VP_DISTANCE*aspect,VP_DISTANCE*aspect, -VP_DISTANCE, VP_DISTANCE,-3*VP_DISTANCE,3*VP_DISTANCE);
-
-    loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
 
     mode = gl.LINES; 
 
@@ -54,23 +53,23 @@ function setup(shaders)
                 if(animation) speed /= 1.1;
                 break;
             case '1':
-                loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
+                projectionState = 1;
                 break;
             case '2':
                 //AP
-                loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
+                projectionState = 2;
                 break;
             case '3':
                 //PLANT
-                loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
+                projectionState = 3;
                 break;
             case '4':
                 //ALD
-                loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
+                projectionState = 4;
                 break;
             case '5':
                 //BONUS
-                loadMatrix(lookAt([0,0,0], [-VP_DISTANCE,0,0], [0,1,0]));
+                projectionState = 5;
                 break;
         }
     }
@@ -126,16 +125,16 @@ function setup(shaders)
     }
 
     function SmallRotor(){
-        multScale([0.7,0.7,0.7]);
         multRotationX(90);
         multRotationY(-2.5 * time);
-            Rotor();
+        multScale([0.7,0.7,0.7]);
+        Rotor();
     }
 
     function LargeRotor(){
-        multScale([1.5,1.5,1.5]);
         multRotationY(2.5 * time);
-            Rotor();
+        multScale([1.5,1.5,1.5]);
+        Rotor();
     }
 
     function Rotor(){
@@ -268,8 +267,8 @@ function setup(shaders)
     }
 
     function MainBody(){
-      //  multRotationY(0.1 * time);
-     //   multRotationZ(30);
+        multRotationY(0.1 * time);
+    //    multRotationZ(30);
         pushMatrix();
             CabinWithLegs();
         popMatrix();
@@ -302,21 +301,28 @@ function setup(shaders)
         gl.useProgram(program);
         
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
-    
-      //  loadMatrix(lookAt([0,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
 
-
-       loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
-
-
-     //front view (any [-VP_DISTANCE,0,0]), back view (any[VP_DISTANCE,0,0])
-  //   loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
-
-     //top view
-   //  loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
-
-     // ALD
-   //  loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
+    switch(projectionState){
+        case 1:
+            loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
+            break;
+        case 2:
+            //AP
+            loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
+            break;
+        case 3:
+            //PLANT
+            loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
+            break;
+        case 4:
+            //ALD
+            loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
+            break;
+        case 5:
+            //BONUS
+            loadMatrix(lookAt([0,0,0], [-1,0,0], [0,1,0]));
+            break;
+    }
 
      MainBody();
     }
