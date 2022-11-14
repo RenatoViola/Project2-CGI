@@ -19,6 +19,7 @@ let animation = true;   // Animation is running
 let projectionState = 1;
 let inclination = 0;
 let ascension = 0;
+let onwards = 0;
 
 const MAX_HEIGHT = 25;
 const MIN_HEIGHT = -25;
@@ -60,14 +61,18 @@ function setup(shaders)
                 if(animation) speed /= 1.1;
                 break;
             case "ArrowUp":
-                if(inclination < MAX_INCLINATION){
+                if(inclination < MAX_INCLINATION)
                     inclination += 2;
-                }
                 break;
             case "ArrowDown":
-                if(inclination > MIN_INCLINATION){
+                if(inclination > MIN_INCLINATION)
                     inclination -= 2;
-                }
+                break;
+            case "ArrowRight":
+                onwards -= 1;
+                break;
+            case "ArrowLeft":
+                onwards += 1;
                 break;
             case 'Shift':
                 if(ascension < MAX_HEIGHT)
@@ -108,7 +113,6 @@ function setup(shaders)
     gl.enable(gl.DEPTH_TEST);   // Enables Z-buffer depth test
     
     window.requestAnimationFrame(render);
-
 
     function resize_canvas(event)
     {
@@ -292,8 +296,9 @@ function setup(shaders)
     }
 
     function MainBody(){
-        multTranslation([0,ascension,0]);
-        multRotationY(0.1 * time);
+        multRotationY(onwards);
+        multTranslation([-0.01*time,ascension,0]);
+  //      multRotationY(onwards);
         multRotationZ(inclination);
         pushMatrix();
             CabinWithLegs();
