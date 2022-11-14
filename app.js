@@ -20,7 +20,11 @@ let projectionState = 1;
 let inclination = 0;
 let ascension = 0;
 
-const VP_DISTANCE = 4;
+const MAX_HEIGHT = 25;
+const MIN_HEIGHT = -25;
+const MAX_INCLINATION = 30;
+const MIN_INCLINATION = 0;
+const VP_DISTANCE = 30;
 
 function setup(shaders)
 {
@@ -56,21 +60,23 @@ function setup(shaders)
                 if(animation) speed /= 1.1;
                 break;
             case "ArrowUp":
-                if(inclination < 30){
+                if(inclination < MAX_INCLINATION){
                     inclination += 2;
                 }
                 break;
             case "ArrowDown":
-                if(inclination > 0){
+                if(inclination > MIN_INCLINATION){
                     inclination -= 2;
                 }
                 break;
             case 'Shift':
-                ascension += 0.1;
+                if(ascension < MAX_HEIGHT)
+                    ascension += 0.3;
                 break;
             case 'Control':
-                ascension -= 0.1;
-                break;s
+                if(ascension > MIN_HEIGHT)
+                    ascension -= 0.3;
+                break;
             case '1':
                 projectionState = 1;
                 break;
