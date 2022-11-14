@@ -15,7 +15,10 @@ let time = 0;           // Global simulation time in days
 let speed = 1;     // Speed (how many days added to time on each render pass
 let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let animation = true;   // Animation is running
+
 let projectionState = 1;
+let inclination = 0;
+let ascension = 0;
 
 const VP_DISTANCE = 4;
 
@@ -52,6 +55,22 @@ function setup(shaders)
             case '-':
                 if(animation) speed /= 1.1;
                 break;
+            case "ArrowUp":
+                if(inclination < 30){
+                    inclination += 2;
+                }
+                break;
+            case "ArrowDown":
+                if(inclination > 0){
+                    inclination -= 2;
+                }
+                break;
+            case 'Shift':
+                ascension += 0.1;
+                break;
+            case 'Control':
+                ascension -= 0.1;
+                break;s
             case '1':
                 projectionState = 1;
                 break;
@@ -267,8 +286,9 @@ function setup(shaders)
     }
 
     function MainBody(){
+        multTranslation([0,ascension,0]);
         multRotationY(0.1 * time);
-    //    multRotationZ(30);
+        multRotationZ(inclination);
         pushMatrix();
             CabinWithLegs();
         popMatrix();
@@ -302,29 +322,29 @@ function setup(shaders)
         
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
 
-    switch(projectionState){
-        case 1:
-            loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
-            break;
-        case 2:
-            //AP
-            loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
-            break;
-        case 3:
-            //PLANT
-            loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
-            break;
-        case 4:
-            //ALD
-            loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
-            break;
-        case 5:
-            //BONUS
-            loadMatrix(lookAt([0,0,0], [-1,0,0], [0,1,0]));
-            break;
-    }
+        switch(projectionState){
+            case 1:
+                loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
+                break;
+            case 2:
+                //AP
+                loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
+                break;
+            case 3:
+                //PLANT
+                loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
+                break;
+            case 4:
+                //ALD
+                loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
+                break;
+            case 5:
+                //BONUS
+                loadMatrix(lookAt([0,0,0], [-1,0,0], [0,1,0]));
+                break;
+        }
 
-     MainBody();
+        MainBody();
     }
 }
 
