@@ -16,13 +16,13 @@ let animation = true;   // Animation is running
 
 let projectionState = 1;
 let inclination = 0;
-let ascension = 0;
+let ascension = 1;
 let acceleration = 0;
 let trajectory = 0;
 let bladeVelocity = 0;
 
 const MAX_HEIGHT = 25;
-const MIN_HEIGHT = -25;
+const GROUND_LEVEL = 1;
 const MAX_INCLINATION = 30;
 const MIN_INCLINATION = 0;
 const MAX_ACCELERATION = 1;
@@ -41,7 +41,7 @@ function setup(shaders)
 
     let mProjection = ortho(-VP_DISTANCE*aspect,VP_DISTANCE*aspect, -VP_DISTANCE, VP_DISTANCE,-3*VP_DISTANCE,3*VP_DISTANCE);
 
-    mode = gl.LINES; 
+    mode = gl.TRIANGLES; 
 
     resize_canvas();
     window.addEventListener("resize", resize_canvas);
@@ -64,12 +64,14 @@ function setup(shaders)
                 if(animation) speed /= 1.1;
                 break;
             case "ArrowUp":
-                if(inclination < MAX_INCLINATION && !isTouchingGround())
-                    inclination += 2;
+                if(ascension < MAX_HEIGHT)
+                    ascension += 0.2;
+                console.log(ascension);
                 break;
             case "ArrowDown":
-                if(inclination > MIN_INCLINATION && !isTouchingGround())
-                    inclination -= 2;
+                if(!isTouchingGround())
+                    ascension -= 0.2;
+                console.log(ascension);
                 break;
             case "ArrowRight":
                 if(acceleration > MIN_ACCELERATION && !isTouchingGround())
@@ -82,14 +84,6 @@ function setup(shaders)
                     acceleration += 0.02;
                 if(inclination < MAX_INCLINATION && !isTouchingGround())
                     inclination += 1;
-                break;
-            case 'Shift':
-                if(ascension < MAX_HEIGHT)
-                    ascension += 0.5;
-                break;
-            case 'Control':
-                if(ascension > MIN_HEIGHT)
-                    ascension -= 0.5;
                 break;
             case '1':
                 projectionState = 1;
@@ -138,6 +132,8 @@ function setup(shaders)
     {
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(modelView()));
     }
+
+    // HELICOPTER ___________________________________________________________
 
     function RotorBlade()
     {
@@ -326,12 +322,41 @@ function setup(shaders)
 
     function Helicopter(){
         multRotationY(trajectory);
-        multTranslation([-30,ascension,0]);
+        multTranslation([30,ascension,0]);
+    //    multTranslation([0,ascension,0]);
         multRotationX(inclination);
         multRotationZ(inclination);
         MainBody();
     }
 
+    // CITY ___________________________________________________________________
+
+    function Ground()
+    {
+        multScale([75.0, 0.2,75.0]);
+
+        uploadModelView();
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor,[0.2,0.9,0.8]);
+
+        CUBE.draw(gl, program, mode);
+    }
+
+    function City(){
+        pushMatrix();
+        Ground();
+        popMatrix();
+    }
+
+
+
+    // OTHERS _________________________________________________________________
+    
+    function FullScene(){
+        City();
+        Helicopter();
+    }
+    
     function render()
     {
         if(animation && !isTouchingGround()){
@@ -368,11 +393,13 @@ function setup(shaders)
                 break;
         }
 
-        Helicopter();
+       // Helicopter();
+       FullScene();
+    //  City();
     }
 
     function isTouchingGround(){
-        return ascension === MIN_HEIGHT;
+        return ascension <= GROUND_LEVEL;
     }
 }
 
