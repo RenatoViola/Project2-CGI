@@ -19,13 +19,15 @@ let animation = true;   // Animation is running
 let projectionState = 1;
 let inclination = 0;
 let ascension = 0;
-let onwards = 0;
+let acceleration = 0;
+let trajectory = 0;
 
 const MAX_HEIGHT = 25;
 const MIN_HEIGHT = -25;
 const MAX_INCLINATION = 30;
 const MIN_INCLINATION = 0;
-const VP_DISTANCE = 30;
+
+const VP_DISTANCE = 40;
 
 function setup(shaders)
 {
@@ -69,10 +71,14 @@ function setup(shaders)
                     inclination -= 2;
                 break;
             case "ArrowRight":
-                onwards -= 1;
+                acceleration -= 0.01;
+                if(inclination > MIN_INCLINATION)
+                    inclination -= 1;
                 break;
             case "ArrowLeft":
-                onwards += 1;
+                acceleration += 0.01;
+                if(inclination < MAX_INCLINATION)
+                    inclination += 1;
                 break;
             case 'Shift':
                 if(ascension < MAX_HEIGHT)
@@ -296,10 +302,7 @@ function setup(shaders)
     }
 
     function MainBody(){
-        multRotationY(onwards);
-        multTranslation([-0.01*time,ascension,0]);
-  //      multRotationY(onwards);
-        multRotationZ(inclination);
+        
         pushMatrix();
             CabinWithLegs();
         popMatrix();
@@ -319,12 +322,19 @@ function setup(shaders)
     }
 
     function Helicopter(){
-
+        multRotationY(trajectory);
+        multTranslation([-30,ascension,0]);
+        multRotationX(inclination);
+        multRotationZ(inclination);
+        MainBody();
     }
 
     function render()
     {
-        if(animation) time += speed;
+        if(animation){
+            time += speed;
+            trajectory += acceleration;
+        }
         window.requestAnimationFrame(render);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -355,7 +365,7 @@ function setup(shaders)
                 break;
         }
 
-        MainBody();
+        Helicopter();
     }
 }
 
