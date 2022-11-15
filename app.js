@@ -11,8 +11,6 @@ import * as TORUS from '../../libs/objects/torus.js';
 /** @type WebGLRenderingContext */
 let gl;
 
-let time = 0;           // Global simulation time in days
-let speed = 1;     // Speed (how many days added to time on each render pass
 let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let animation = true;   // Animation is running
 
@@ -21,11 +19,14 @@ let inclination = 0;
 let ascension = 0;
 let acceleration = 0;
 let trajectory = 0;
+let bladeVelocity = 0;
 
 const MAX_HEIGHT = 25;
 const MIN_HEIGHT = -25;
 const MAX_INCLINATION = 30;
 const MIN_INCLINATION = 0;
+const MAX_ACCELERATION = 1;
+const MIN_ACCELERATION = 0;
 
 const VP_DISTANCE = 40;
 
@@ -71,22 +72,24 @@ function setup(shaders)
                     inclination -= 2;
                 break;
             case "ArrowRight":
-                acceleration -= 0.01;
+                if(acceleration > MIN_ACCELERATION)
+                    acceleration -= 0.02;
                 if(inclination > MIN_INCLINATION)
                     inclination -= 1;
                 break;
             case "ArrowLeft":
-                acceleration += 0.01;
+                if(acceleration < MAX_ACCELERATION)
+                    acceleration += 0.02;
                 if(inclination < MAX_INCLINATION)
                     inclination += 1;
                 break;
             case 'Shift':
                 if(ascension < MAX_HEIGHT)
-                    ascension += 0.3;
+                    ascension += 0.5;
                 break;
             case 'Control':
                 if(ascension > MIN_HEIGHT)
-                    ascension -= 0.3;
+                    ascension -= 0.5;
                 break;
             case '1':
                 projectionState = 1;
@@ -161,13 +164,13 @@ function setup(shaders)
 
     function SmallRotor(){
         multRotationX(90);
-        multRotationY(-2.5 * time);
+        multRotationY(-2.5 * bladeVelocity);
         multScale([0.7,0.7,0.7]);
         Rotor();
     }
 
     function LargeRotor(){
-        multRotationY(2.5 * time);
+        multRotationY(2.5 * bladeVelocity);
         multScale([1.5,1.5,1.5]);
         Rotor();
     }
@@ -332,8 +335,8 @@ function setup(shaders)
     function render()
     {
         if(animation){
-            time += speed;
             trajectory += acceleration;
+            bladeVelocity += acceleration + 1;
         }
         window.requestAnimationFrame(render);
 
