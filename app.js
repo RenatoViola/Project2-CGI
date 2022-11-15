@@ -64,23 +64,23 @@ function setup(shaders)
                 if(animation) speed /= 1.1;
                 break;
             case "ArrowUp":
-                if(inclination < MAX_INCLINATION)
+                if(inclination < MAX_INCLINATION && !isTouchingGround())
                     inclination += 2;
                 break;
             case "ArrowDown":
-                if(inclination > MIN_INCLINATION)
+                if(inclination > MIN_INCLINATION && !isTouchingGround())
                     inclination -= 2;
                 break;
             case "ArrowRight":
-                if(acceleration > MIN_ACCELERATION)
+                if(acceleration > MIN_ACCELERATION && !isTouchingGround())
                     acceleration -= 0.02;
-                if(inclination > MIN_INCLINATION)
+                if(inclination > MIN_INCLINATION && !isTouchingGround())
                     inclination -= 1;
                 break;
             case "ArrowLeft":
-                if(acceleration < MAX_ACCELERATION)
+                if(acceleration < MAX_ACCELERATION && !isTouchingGround())
                     acceleration += 0.02;
-                if(inclination < MAX_INCLINATION)
+                if(inclination < MAX_INCLINATION && !isTouchingGround())
                     inclination += 1;
                 break;
             case 'Shift':
@@ -334,9 +334,9 @@ function setup(shaders)
 
     function render()
     {
-        if(animation){
+        if(animation && !isTouchingGround()){
             trajectory += acceleration;
-            bladeVelocity += acceleration + 1;
+            bladeVelocity += acceleration + 1.5;
         }
         window.requestAnimationFrame(render);
 
@@ -369,6 +369,10 @@ function setup(shaders)
         }
 
         Helicopter();
+    }
+
+    function isTouchingGround(){
+        return ascension === MIN_HEIGHT;
     }
 }
 
