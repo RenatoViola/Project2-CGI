@@ -1,5 +1,5 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
-import { ortho, lookAt, flatten, rotateY } from "../../libs/MV.js";
+import { ortho, lookAt, flatten} from "../../libs/MV.js";
 import {modelView, loadMatrix, multRotationX, multRotationY, multRotationZ, multScale, pushMatrix, popMatrix, multTranslation } from "../../libs/stack.js";
 
 import * as SPHERE from '../../libs/objects/sphere.js';
@@ -66,12 +66,16 @@ function setup(shaders)
             case "ArrowUp":
                 if(ascension < MAX_HEIGHT)
                     ascension += 0.2;
-                console.log(ascension);
                 break;
             case "ArrowDown":
                 if(!isTouchingGround())
                     ascension -= 0.2;
-                console.log(ascension);
+                if(ascension < 6 && inclination > MIN_INCLINATION){
+                    inclination -= Math.log(ascension) * 1.1;
+                    if(acceleration > MIN_ACCELERATION)
+                        acceleration -= 0.03;
+                }
+                liftOff();
                 break;
             case "ArrowRight":
                 if(acceleration > MIN_ACCELERATION && !isTouchingGround())
@@ -80,10 +84,12 @@ function setup(shaders)
                     inclination -= 1;
                 break;
             case "ArrowLeft":
-                if(acceleration < MAX_ACCELERATION && !isTouchingGround())
-                    acceleration += 0.02;
-                if(inclination < MAX_INCLINATION && !isTouchingGround())
-                    inclination += 1;
+                if(ascension >= 6){
+                    if(acceleration < MAX_ACCELERATION && !isTouchingGround())
+                        acceleration += 0.02;
+                    if(inclination < MAX_INCLINATION && !isTouchingGround())
+                        inclination += 1;
+                }
                 break;
             case '1':
                 projectionState = 1;
@@ -322,9 +328,10 @@ function setup(shaders)
 
     function Helicopter(){
         multRotationY(trajectory);
-        multTranslation([30,ascension,0]);
-    //    multTranslation([0,ascension,0]);
+        multTranslation([0,ascension,-30]);
+        //detalhinho extra
         multRotationX(inclination);
+        //_______________________
         multRotationZ(inclination);
         MainBody();
     }
@@ -338,7 +345,6 @@ function setup(shaders)
         uploadModelView();
         const uColor = gl.getUniformLocation(program, "uColor");
         gl.uniform3fv(uColor,[0.2,0.9,0.8]);
-
         CUBE.draw(gl, program, mode);
     }
 
@@ -363,6 +369,9 @@ function setup(shaders)
             trajectory += acceleration;
             bladeVelocity += acceleration + 1.5;
         }
+
+     //   liftOff();
+
         window.requestAnimationFrame(render);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -400,6 +409,12 @@ function setup(shaders)
 
     function isTouchingGround(){
         return ascension <= GROUND_LEVEL;
+    }
+
+    function liftOff(){
+        if(isTouchingGround()){
+            acceleration = 0;
+        }
     }
 }
 
