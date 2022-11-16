@@ -12,14 +12,11 @@ import * as TORUS from '../../libs/objects/torus.js';
 let gl;
 
 let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
-let animation = true;   // Animation is running
 
+let time = 0;
 let projectionState = 1;
-let inclination = 0;
-let ascension = 1;
-let acceleration = 0;
-let trajectory = 0;
-let bladeVelocity = 0;
+let helicopter = {pos: [0, 1, -30], acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
+let boxes = [];
 
 const MAX_HEIGHT = 25;
 const GROUND_LEVEL = 1;
@@ -27,6 +24,7 @@ const MAX_INCLINATION = 30;
 const MIN_INCLINATION = 0;
 const MAX_ACCELERATION = 1;
 const MIN_ACCELERATION = 0;
+const GRAVITY = 9.8;
 
 const VP_DISTANCE = 40;
 
@@ -54,42 +52,36 @@ function setup(shaders)
             case 's':
                 mode = gl.TRIANGLES;
                 break;
-            case 'p':
-                animation = !animation;
+            case 'ArrowUp':
+                if(helicopter.pos[1] < MAX_HEIGHT)
+                    helicopter.pos[1] += 0.2;
                 break;
-            case '+':
-                if(animation) speed *= 1.1;
-                break;
-            case '-':
-                if(animation) speed /= 1.1;
-                break;
-            case "ArrowUp":
-                if(ascension < MAX_HEIGHT)
-                    ascension += 0.2;
-                break;
-            case "ArrowDown":
+            case 'ArrowDown':
                 if(!isTouchingGround())
-                    ascension -= 0.2;
-                if(ascension < 6 && inclination > MIN_INCLINATION){
-                    inclination -= Math.log(ascension) * 1.1;
-                    if(acceleration > MIN_ACCELERATION)
-                        acceleration -= 0.03;
+                    helicopter.pos[1] -= 0.2;
+                if(helicopter.pos[1] < 6 && helicopter.inclination > MIN_INCLINATION){
+                    helicopter.inclination -= Math.log(helicopter.pos[1]) * 1.1;
+                    if(helicopter.acceleration > MIN_ACCELERATION)
+                        helicopter.acceleration -= 0.02;
                 }
                 liftOff();
                 break;
-            case "ArrowRight":
-                if(acceleration > MIN_ACCELERATION && !isTouchingGround())
-                    acceleration -= 0.02;
-                if(inclination > MIN_INCLINATION && !isTouchingGround())
-                    inclination -= 1;
+            case 'ArrowRight':
+                if(helicopter.acceleration > MIN_ACCELERATION && !isTouchingGround())
+                    helicopter.acceleration -= 0.02;
+                if(helicopter.inclination > MIN_INCLINATION && !isTouchingGround())
+                    helicopter.inclination -= 1;
                 break;
-            case "ArrowLeft":
-                if(ascension >= 6){
-                    if(acceleration < MAX_ACCELERATION && !isTouchingGround())
-                        acceleration += 0.02;
-                    if(inclination < MAX_INCLINATION && !isTouchingGround())
-                        inclination += 1;
+            case 'ArrowLeft':
+                if(helicopter.pos[1] >= 6){
+                    if(helicopter.acceleration < MAX_ACCELERATION && !isTouchingGround())
+                        helicopter.acceleration += 0.02;
+                    if(helicopter.inclination < MAX_INCLINATION && !isTouchingGround())
+                        helicopter.inclination += 1;
                 }
+                break;
+            case ' ':
+                drop();
                 break;
             case '1':
                 projectionState = 1;
@@ -166,13 +158,13 @@ function setup(shaders)
 
     function SmallRotor(){
         multRotationX(90);
-        multRotationY(-2.5 * bladeVelocity);
+        multRotationY(-2.5 * helicopter.bladeVelocity);
         multScale([0.7,0.7,0.7]);
         Rotor();
     }
 
     function LargeRotor(){
-        multRotationY(2.5 * bladeVelocity);
+        multRotationY(2.5 * helicopter.bladeVelocity);
         multScale([1.5,1.5,1.5]);
         Rotor();
     }
@@ -327,12 +319,12 @@ function setup(shaders)
     }
 
     function Helicopter(){
-        multRotationY(trajectory);
-        multTranslation([0,ascension,-30]);
+        multRotationY(helicopter.trajectory);
+        multTranslation(helicopter.pos);
         //detalhinho extra
-        multRotationX(inclination);
+        multRotationX(helicopter.inclination);
         //_______________________
-        multRotationZ(inclination);
+        multRotationZ(helicopter.inclination);
         MainBody();
     }
 
@@ -350,30 +342,64 @@ function setup(shaders)
 
     function City(){
         pushMatrix();
-        Ground();
+            Ground();
         popMatrix();
     }
 
-
-
     // OTHERS _________________________________________________________________
     
-    function FullScene(){
-        City();
-        Helicopter();
+    function Box()
+    {
+        multScale([0.5, 0.5, 0.5]);
+        
+        // Send the current modelview matrix to the vertex shader
+        uploadModelView();
+
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, [1.0, 1.0, 1.0]);
+        CUBE.draw(gl, program, mode);
+    }
+
+    function ShowBoxes(){
+        for(let i = 0; i < boxes.length; i++){
+            const box = boxes[i];
+            if(box.pos[1] > GROUND_LEVEL - 0.5)
+                box.pos[1] -= 0.2;
+            pushMatrix();
+                multRotationY(box.trajectory);
+                multTranslation(box.pos);
+                Box();
+            popMatrix();
+        }
+    }
+
+    function FullScene()
+    { 
+        pushMatrix();
+            City();
+        popMatrix();
+        pushMatrix();
+            Helicopter();
+        popMatrix();
+        pushMatrix();
+            ShowBoxes();
+        popMatrix();   
+        
     }
     
-    function render()
+    function render(millisecs)
     {
-        if(animation && !isTouchingGround()){
-            trajectory += acceleration;
-            bladeVelocity += acceleration + 1.5;
+        if(!isTouchingGround()){
+            helicopter.trajectory += helicopter.acceleration;
+            helicopter.bladeVelocity += helicopter.acceleration + 1.5;
         }
-
-     //   liftOff();
 
         window.requestAnimationFrame(render);
 
+        time = millisecs / 1000;
+
+        growOld();
+        
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
         gl.useProgram(program);
@@ -402,19 +428,30 @@ function setup(shaders)
                 break;
         }
 
-       // Helicopter();
        FullScene();
-    //  City();
     }
 
     function isTouchingGround(){
-        return ascension <= GROUND_LEVEL;
+        return helicopter.pos[1] <= GROUND_LEVEL;
     }
 
     function liftOff(){
         if(isTouchingGround()){
-            acceleration = 0;
+            helicopter.acceleration = 0;
         }
+    }
+
+    function growOld(){
+        for(let i = 0; i < boxes.length; i++){   
+            if(time - boxes[i].creation >= 5)
+                boxes.shift();
+        }
+    }
+
+    function drop(){
+        const boxPos = [helicopter.pos[0], helicopter.pos[1], helicopter.pos[2]];
+        let box = {pos: boxPos, creation: time, trajectory: helicopter.trajectory};
+            boxes.push(box);
     }
 }
 
