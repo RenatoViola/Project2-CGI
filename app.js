@@ -436,16 +436,14 @@ function setup(shaders)
     }
 
     function liftOff(){
-        if(isTouchingGround()){
+        if(isTouchingGround())
             helicopter.acceleration = 0;
-        }
     }
 
     function growOld(){
-        for(let i = 0; i < boxes.length; i++){   
+        for(let i = 0; i < boxes.length; i++)   
             if(time - boxes[i].creation >= 5)
-                boxes.shift();
-        }
+                boxes.shift();   
     }
 
     function drop(){
