@@ -17,14 +17,15 @@ let time = 0;
 let projectionState = 1;
 let helicopter = {pos: [0, 1, -30], acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
 let boxes = [];
+let thetaSlider = document.getElementById("theta");
+let gammaSlider = document.getElementById("gamma");
 
-const MAX_HEIGHT = 25;
+const MAX_HEIGHT = 27;
 const GROUND_LEVEL = 1;
 const MAX_INCLINATION = 30;
 const MIN_INCLINATION = 0;
 const MAX_ACCELERATION = 1;
 const MIN_ACCELERATION = 0;
-const GRAVITY = 9.8;
 
 const VP_DISTANCE = 40;
 
@@ -348,9 +349,11 @@ function setup(shaders)
 
     // OTHERS _________________________________________________________________
     
-    function Box()
+    function Box(box)
     {
-        multScale([0.5, 0.5, 0.5]);
+        multRotationY(box.trajectory);
+        multTranslation(box.pos);
+        multScale([0.7, 0.7, 0.7]);
         
         // Send the current modelview matrix to the vertex shader
         uploadModelView();
@@ -360,15 +363,18 @@ function setup(shaders)
         CUBE.draw(gl, program, mode);
     }
 
-    function ShowBoxes(){
+    function Boxes(){
         for(let i = 0; i < boxes.length; i++){
             const box = boxes[i];
-            if(box.pos[1] > GROUND_LEVEL - 0.5)
-                box.pos[1] -= 0.2;
+           // if(box.pos[1] > GROUND_LEVEL - 0.5)
+             //   box.pos[1] -= 0.2;
+                const age = time - boxes[i].timeOfCreation;
+                if(box.pos[1] - 3 * age > GROUND_LEVEL - 0.6)
+                    box.pos[1] -= 3 * age;
+                else
+                    box.pos[1] = GROUND_LEVEL - 0.6; 
             pushMatrix();
-                multRotationY(box.trajectory);
-                multTranslation(box.pos);
-                Box();
+                Box(box);
             popMatrix();
         }
     }
@@ -382,7 +388,7 @@ function setup(shaders)
             Helicopter();
         popMatrix();
         pushMatrix();
-            ShowBoxes();
+            Boxes();
         popMatrix();   
         
     }
@@ -406,29 +412,9 @@ function setup(shaders)
         
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
 
-        switch(projectionState){
-            case 1:
-                loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
-                break;
-            case 2:
-                //AP
-                loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
-                break;
-            case 3:
-                //PLANT
-                loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
-                break;
-            case 4:
-                //ALD
-                loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
-                break;
-            case 5:
-                //BONUS
-                loadMatrix(lookAt([0,0,0], [-1,0,0], [0,1,0]));
-                break;
-        }
+        enactProjection();
 
-       FullScene();
+        FullScene();
     }
 
     function isTouchingGround(){
@@ -442,14 +428,56 @@ function setup(shaders)
 
     function growOld(){
         for(let i = 0; i < boxes.length; i++)   
-            if(time - boxes[i].creation >= 5)
+            if(time - boxes[i].timeOfCreation >= 5)
                 boxes.shift();   
     }
 
     function drop(){
         const boxPos = [helicopter.pos[0], helicopter.pos[1], helicopter.pos[2]];
-        let box = {pos: boxPos, creation: time, trajectory: helicopter.trajectory};
+        let box = {pos: boxPos, timeOfCreation: time, trajectory: helicopter.trajectory};
             boxes.push(box);
+    }
+
+    function enactProjection(){
+        switch(projectionState){
+            case 1:
+             //   loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
+                loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
+                multRotationY(thetaSlider.value);
+                multRotationX(gammaSlider.value);
+                showSliders();
+                break;
+            case 2:
+                //AP
+                loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
+                hideSliders();
+                break;
+            case 3:
+                //PLANT
+                loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
+                hideSliders();
+                break;
+            case 4:
+                //ALD
+                loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
+                hideSliders();
+                break;
+            case 5:
+                //BONUS
+                loadMatrix(lookAt([0,0,0], [-1,0,0], [0,1,0]));
+                hideSliders();
+                break;
+        }
+    }
+
+    function hideSliders(){
+        thetaSlider.style.display = "none";
+        gammaSlider.style.display = "none";
+    }
+
+    function showSliders(){
+        thetaSlider.style.display = "block";
+        gammaSlider.style.display = "block";
     }
 }
 
