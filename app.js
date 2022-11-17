@@ -15,6 +15,7 @@ let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 
 let time = 0;
 let projectionState = 1;
+//let helicopter = {pos: [0, 0, 0], acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
 let helicopter = {pos: [0, 1, -30], acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
 let boxes = [];
 let thetaSlider = document.getElementById("theta");
@@ -322,6 +323,7 @@ function setup(shaders)
     function Helicopter(){
         multRotationY(helicopter.trajectory);
         multTranslation(helicopter.pos);
+        //multRotationY(helicopter.trajectory);
         //detalhinho extra
         multRotationX(helicopter.inclination);
         //_______________________
@@ -381,13 +383,18 @@ function setup(shaders)
 
     function FullScene()
     { 
+         //por a frente apontada para z positivo. a frente estava apontada para x negativo.
+        multRotationY(90); 
         pushMatrix();
+          //  multRotationY(90);
             City();
         popMatrix();
         pushMatrix();
+          //  multRotationY(90);
             Helicopter();
         popMatrix();
         pushMatrix();
+           // multRotationY(90);
             Boxes();
         popMatrix();   
         
@@ -415,6 +422,7 @@ function setup(shaders)
         enactProjection();
 
         FullScene();
+       //Helicopter();
     }
 
     function isTouchingGround(){
@@ -441,25 +449,34 @@ function setup(shaders)
     function enactProjection(){
         switch(projectionState){
             case 1:
-             //   loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
-                loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
+                loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
+             /*   loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
                 multRotationY(thetaSlider.value);
                 multRotationX(gammaSlider.value);
+                showSliders();*/
+                frontView();
+                multRotationX(gammaSlider.value);
+                multRotationY(thetaSlider.value);                
                 showSliders();
                 break;
             case 2:
                 //AP
-                loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
+                //    loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
+                frontView();
                 hideSliders();
                 break;
             case 3:
                 //PLANT
-                loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
+             //   loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
+                frontView();
+                multRotationX(90);
                 hideSliders();
                 break;
             case 4:
                 //ALD
-                loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
+               // loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
+                frontView();
+                multRotationY(-90);
                 hideSliders();
                 break;
             case 5:
@@ -478,6 +495,10 @@ function setup(shaders)
     function showSliders(){
         thetaSlider.style.display = "block";
         gammaSlider.style.display = "block";
+    }
+
+    function frontView(){
+        loadMatrix(lookAt([0,0,VP_DISTANCE],[0,0,0],[0,1,0]));
     }
 }
 
