@@ -109,12 +109,12 @@ function setup(shaders)
         }
     }
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.3, 1, 1, 1.0);
     SPHERE.init(gl);
     CYLINDER.init(gl);
     CUBE.init(gl);
     PYRAMID.init(gl);
-    TORUS.init(gl);
+    TORUS.init(gl,100,100,0.5,0.2);
     gl.enable(gl.DEPTH_TEST);   // Enables Z-buffer depth test
     
     window.requestAnimationFrame(render);
@@ -695,13 +695,11 @@ function setup(shaders)
     }
 
     function hideSliders(){
-        thetaSlider.style.display = "none";
-        gammaSlider.style.display = "none";
+        document.getElementById("sliders").style.display = "none";
     }
 
     function showSliders(){
-        thetaSlider.style.display = "block";
-        gammaSlider.style.display = "block";
+        document.getElementById("sliders").style.display = "block";
       /*  console.log(thetaSlider.value);
         console.log(gammaSlider.value);*/
     }
