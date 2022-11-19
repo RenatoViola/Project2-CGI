@@ -643,7 +643,7 @@ function setup(shaders)
     function drop(){
         const boxPos = [0, helicopter.ascension, -25];
         let box = {pos: boxPos, timeOfCreation: time, trajectory: helicopter.trajectory}; 
-     //   let box = {pos: heliPos, timeOfCreation: time};
+      //  let box = {pos: heliPos, timeOfCreation: time};
         boxes.push(box);
         console.log(boxes);
     }
