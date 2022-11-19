@@ -30,7 +30,7 @@ const MIN_INCLINATION = 0;
 const MAX_ACCELERATION = 1;
 const MIN_ACCELERATION = 0;
 
-const VP_DISTANCE = 40;
+const VP_DISTANCE = 45;
 
 function setup(shaders)
 {
@@ -326,7 +326,7 @@ function setup(shaders)
         
         multRotationY(helicopter.trajectory);
         
-        multTranslation([0,helicopter.ascension,-30]); 
+        multTranslation([0,helicopter.ascension,-25]); 
 
         //detalhinho extra
         multRotationX(helicopter.inclination);
@@ -349,13 +349,248 @@ function setup(shaders)
 
         uploadModelView();
         const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor,[0.2,0.9,0.8]);
+        gl.uniform3fv(uColor,[0.1,0.5,0.4]);
         CUBE.draw(gl, program, mode);
+    }
+
+    function Cube(color){
+        uploadModelView();
+        
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, color);
+
+        CUBE.draw(gl, program, mode);
+    }
+
+    function Pyramid(color){
+        uploadModelView();
+        
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, color);
+
+        PYRAMID.draw(gl, program, mode);
+    }
+
+    function Cylinder(color){
+        uploadModelView();
+        
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, color);
+
+        CYLINDER.draw(gl, program, mode);
+    }
+
+    function Sphere(color){
+        uploadModelView();
+
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, color);
+
+        SPHERE.draw(gl, program, mode);
+    }
+
+    function Torus(color){
+        uploadModelView();
+        
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, color);
+
+        TORUS.draw(gl, program, mode);
+    }
+
+    function Window(){
+        multScale([5.05, 1.2, 1.2]);
+
+        uploadModelView();
+        
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, [1,1,0.3]);
+
+        CUBE.draw(gl, program, mode);
+    }
+
+    function BuildingBlock(color){
+        pushMatrix();
+            multScale([5,5,5]);
+            Cube(color);
+        popMatrix();
+        const leftCorner = -1.4;
+        for(let i = 0; i < 3; i++)
+            for(let j = 0; j < 3; j++){
+                pushMatrix();
+                multTranslation([0,leftCorner+(j*1.4),leftCorner+(i*1.4)]);
+                Window();
+                popMatrix();
+                pushMatrix();
+                multRotationY(90);
+                multTranslation([0,leftCorner+(j*1.4),leftCorner+(i*1.4)]);
+                Window();
+                popMatrix();
+            }
+    }
+
+    function Building1(){
+        pushMatrix();
+            multScale([1.5,2,1.5]);
+            BuildingBlock([0.5,0.5,0.5]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,8.4,0])
+            multScale([1.5,2,1.5]);
+            BuildingBlock([0.5,0.5,0.5]);
+        popMatrix();
+    }
+
+    function Building2(){
+        pushMatrix();
+            multScale([2,2.5,1.5]);
+            BuildingBlock([0.5,0.5,0.5]);
+        popMatrix();
+    }
+
+    function Skyscraper(){
+        pushMatrix();
+            multScale([1.5,2.5,1.5]);
+            BuildingBlock([0.5,0.5,0.5]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,10,0]);
+            multScale([1,2,1]);
+            BuildingBlock([0.6,0.6,0.6]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,18,0]);
+            multScale([4,8,4]);
+            Pyramid([0.3,0.4,0.4]);
+        popMatrix();
+    }
+
+    function LuxuryBuilding(){
+        pushMatrix();
+            multScale([3,3,3]);
+            BuildingBlock([0.5,0.7,0.7]);
+        popMatrix();
+        pushMatrix();
+            multRotationY(45);
+            multScale([3,3,3]);
+            BuildingBlock([0.5,0.7,0.7]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,6,0]);
+            multScale([15,7.5,15]);
+            Sphere([0.8,0.8,0.8]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,16,0]);
+            multScale([0.5,15,0.5]);
+            Cylinder([0.2,0.2,0.3]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,15,0]);
+            multScale([7,3.5,7]);
+            Torus([0.3,0.3,0.3]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,18,0]);
+            multScale([5,2,5]);
+            Torus([0.6,0.6,0.6]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,21,0]);
+            multScale([3,1.2,3]);
+            Torus([1,1,1]);
+        popMatrix();
+    }
+
+    function Buildings(){
+        pushMatrix();
+            multTranslation([-32,5,32]);
+            Building1();
+        popMatrix();
+        pushMatrix();
+            multTranslation([-24,6.3,32]);
+            Building2();
+        popMatrix();
+        pushMatrix();
+            multTranslation([25,6.3,-30]);
+            multRotationY(55);
+            Skyscraper();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,7.5,0]);
+            LuxuryBuilding();
+        popMatrix();
+    }
+
+    function Tree(){
+        pushMatrix();
+            multTranslation([0,2.7,0]);
+            multScale([3,3.5,3]);
+            Pyramid([0,0.4,0]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,2.7,0]);
+            multRotationY(45);
+            multScale([3,3.5,3]);
+            Pyramid([0,0.5,0]);
+        popMatrix();
+        pushMatrix();
+            multScale([0.5,2,0.5]);
+            Cube([0.3,0.2,0]);
+        popMatrix();
+    }
+
+    function Trees(){
+        pushMatrix();
+            multTranslation([-33,1,-33]);
+            Tree();
+        popMatrix();
+        pushMatrix();
+            multTranslation([-29,1,-30]);
+            Tree();
+        popMatrix();
+        pushMatrix();
+            multTranslation([-32,1,-22]);
+            Tree();
+        popMatrix();
+        pushMatrix();
+            multTranslation([30,1,33]);
+            Tree();
+        popMatrix();
+        pushMatrix();
+            multTranslation([27,1,25]);
+            Tree();
+        popMatrix();
+        pushMatrix();
+            multTranslation([22,1,29]);
+            Tree();
+        popMatrix();
+        pushMatrix();
+            multTranslation([33,1,15]);
+            Tree();
+        popMatrix();
+    }
+
+    function Lake(){
+        pushMatrix();
+            multRotationY(40);
+            multScale([30,0.6,35]);
+            Torus([0.3,0.8,0.9]);
+        popMatrix();
     }
 
     function City(){
         pushMatrix();
             Ground();
+        popMatrix();
+        pushMatrix();
+            Buildings();
+        popMatrix();
+        pushMatrix();
+            Trees();
+        popMatrix();
+        pushMatrix();
+            Lake();
         popMatrix();
     }
 
@@ -371,15 +606,13 @@ function setup(shaders)
         uploadModelView();
 
         const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [1.0, 1.0, 1.0]);
+        gl.uniform3fv(uColor, [0.7, 0.6, 0]);
         CUBE.draw(gl, program, mode);
     } 
 
     function Boxes(){
         for(let i = 0; i < boxes.length; i++){
             const box = boxes[i];
-           // if(box.pos[1] > GROUND_LEVEL - 0.5)
-             //   box.pos[1] -= 0.2;
                 const age = time - boxes[i].timeOfCreation;
                 if(box.pos[1] - 3 * age > GROUND_LEVEL - 0.6)
                     box.pos[1] -= 3 * age;
@@ -396,15 +629,12 @@ function setup(shaders)
          //por a frente apontada para z positivo. a frente estava apontada para x negativo.
         multRotationY(90); 
         pushMatrix();
-          //  multRotationY(90);
             City();
         popMatrix();
         pushMatrix();
-          //  multRotationY(90);
             Helicopter();
         popMatrix();
         pushMatrix();
-           // multRotationY(90);
             Boxes();
         popMatrix();
         
@@ -451,8 +681,8 @@ function setup(shaders)
     }
 
     function drop(){
-        const boxPos = [0, helicopter.ascension, -30];
-        let box = {pos: boxPos, timeOfCreation: time, trajectory: helicopter.trajectory};
+        const boxPos = [0, helicopter.ascension, -25];
+        let box = {pos: boxPos, timeOfCreation: time, trajectory: helicopter.trajectory}; 
      //   let box = {pos: heliPos, timeOfCreation: time};
         boxes.push(box);
         console.log(boxes);
@@ -461,11 +691,6 @@ function setup(shaders)
     function enactProjection(){
         switch(projectionState){
             case 1:
-             //   loadMatrix(lookAt([-VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
-             /*   loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
-                multRotationY(thetaSlider.value);
-                multRotationX(gammaSlider.value);
-                showSliders();*/
                 frontView();
                 multRotationX(gammaSlider.value);
                 multRotationY(thetaSlider.value);                
@@ -473,27 +698,24 @@ function setup(shaders)
                 break;
             case 2:
                 //AP
-                //    loadMatrix(lookAt([-VP_DISTANCE,0,0], [0,0,0], [0,1,0]));
                 frontView();
                 hideSliders();
                 break;
             case 3:
                 //PLANT
-             //   loadMatrix(lookAt([0,VP_DISTANCE,0], [0,0,0], [1,0,0]));
                 frontView();
                 multRotationX(90);
                 hideSliders();
                 break;
             case 4:
                 //ALD
-               // loadMatrix(lookAt([0,0,VP_DISTANCE], [0,0,0], [0,1,0]));
                 frontView();
                 multRotationY(-90);
                 hideSliders();
                 break;
             case 5:
                 //BONUS
-                loadMatrix(lookAt([0,0,0], [-1,0,0], [0,1,0]));
+                loadMatrix(lookAt(heliPos, [0,0,0], [0,1,0]));
                 hideSliders();
                 break;
         }
@@ -507,6 +729,8 @@ function setup(shaders)
     function showSliders(){
         thetaSlider.style.display = "block";
         gammaSlider.style.display = "block";
+      /*  console.log(thetaSlider.value);
+        console.log(gammaSlider.value);*/
     }
 
     function frontView(){
