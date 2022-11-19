@@ -17,7 +17,7 @@ let time = 0;
 let projectionState = 1;
 let mView;
 //let helicopter = {pos: [0, 0, 0], acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
-let helicopter = {pos: [0, 1, -30], acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
+let helicopter = {ascension: 1, acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
 let heliPos;
 let boxes = [];
 let thetaSlider = document.getElementById("theta");
@@ -57,14 +57,14 @@ function setup(shaders)
                 mode = gl.TRIANGLES;
                 break;
             case 'ArrowUp':
-                if(helicopter.pos[1] < MAX_HEIGHT)
-                    helicopter.pos[1] += 0.2;
+                if(helicopter.ascension < MAX_HEIGHT)
+                    helicopter.ascension += 0.2;
                 break;
             case 'ArrowDown':
                 if(!isTouchingGround())
-                    helicopter.pos[1] -= 0.2;
-                if(helicopter.pos[1] < 6 && helicopter.inclination > MIN_INCLINATION){
-                    helicopter.inclination -= Math.log(helicopter.pos[1]) * 1.1;
+                    helicopter.ascension -= 0.2;
+                if(helicopter.ascension < 6 && helicopter.inclination > MIN_INCLINATION){
+                    helicopter.inclination -= Math.log(helicopter.ascension) * 1.1;
                     if(helicopter.acceleration > MIN_ACCELERATION)
                         helicopter.acceleration -= 0.02;
                 }
@@ -77,7 +77,7 @@ function setup(shaders)
                     helicopter.inclination -= 1;
                 break;
             case 'ArrowLeft':
-                if(helicopter.pos[1] >= 6){
+                if(helicopter.ascension >= 6){
                     if(helicopter.acceleration < MAX_ACCELERATION && !isTouchingGround())
                         helicopter.acceleration += 0.02;
                     if(helicopter.inclination < MAX_INCLINATION && !isTouchingGround())
@@ -326,7 +326,7 @@ function setup(shaders)
         
         multRotationY(helicopter.trajectory);
         
-        multTranslation(helicopter.pos); 
+        multTranslation([0,helicopter.ascension,-30]); 
 
         //detalhinho extra
         multRotationX(helicopter.inclination);
@@ -436,7 +436,7 @@ function setup(shaders)
     }
 
     function isTouchingGround(){
-        return helicopter.pos[1] <= GROUND_LEVEL;
+        return helicopter.ascension <= GROUND_LEVEL;
     }
 
     function liftOff(){
@@ -451,7 +451,7 @@ function setup(shaders)
     }
 
     function drop(){
-        const boxPos = [helicopter.pos[0], helicopter.pos[1], helicopter.pos[2]];
+        const boxPos = [0, helicopter.ascension, -30];
         let box = {pos: boxPos, timeOfCreation: time, trajectory: helicopter.trajectory};
      //   let box = {pos: heliPos, timeOfCreation: time};
         boxes.push(box);
