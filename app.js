@@ -135,42 +135,63 @@ function setup(shaders)
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(modelView()));
     }
 
-    // HELICOPTER ___________________________________________________________
+    // BASIC OBJECTS ________________________________________________________
 
-    function RotorBlade()
-    {
-        multScale([1.5, 0.05, 0.2]);
+    function Cube(color){
+        uploadModelView();
         
-        // Send the current modelview matrix to the vertex shader
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, color);
+
+        CUBE.draw(gl, program, mode);
+    }
+
+    function Pyramid(color){
+        uploadModelView();
+        
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, color);
+
+        PYRAMID.draw(gl, program, mode);
+    }
+
+    function Cylinder(color){
+        uploadModelView();
+        
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, color);
+
+        CYLINDER.draw(gl, program, mode);
+    }
+
+    function Sphere(color){
         uploadModelView();
 
         const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [1.0, 1.0, 1.0]);
+        gl.uniform3fv(uColor, color);
+
         SPHERE.draw(gl, program, mode);
+    }
+
+    function Torus(color){
+        uploadModelView();
+        
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, color);
+
+        TORUS.draw(gl, program, mode);
+    }
+
+    // HELICOPTER ___________________________________________________________
+
+    function RotorBlade(){
+        multScale([1.5, 0.05, 0.2]);
+        Sphere([1.0, 1.0, 1.0]);
     }
 
     function RotorPivot(){
         multScale([0.1, 0.4, 0.1]);
-
-        // Send the current modelview matrix to the vertex shader
-        uploadModelView();
-
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [0.5, 0.5, 0.5]);
-        CYLINDER.draw(gl, program, mode);
-    }
-
-    function SmallRotor(){
-        multRotationX(90);
-        multRotationY(-2.5 * helicopter.bladeVelocity);
-        multScale([0.7,0.7,0.7]);
-        Rotor();
-    }
-
-    function LargeRotor(){
-        multRotationY(2.5 * helicopter.bladeVelocity);
-        multScale([1.5,1.5,1.5]);
-        Rotor();
+        Cylinder([0.5, 0.5, 0.5]);
     }
 
     function Rotor(){
@@ -187,27 +208,43 @@ function setup(shaders)
         popMatrix();
     }
 
-    function SpiderLegSegment(){
-        multScale([0.1, 1.5, 0.1]);
-        
-        // Send the current modelview matrix to the vertex shader
-        uploadModelView();
+    function SmallRotor(){
+        multRotationX(90);
+        multRotationY(-2.5 * helicopter.bladeVelocity);
+        multScale([0.7,0.7,0.7]);
+        Rotor();
+    }
 
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [0.1, 0.2, 0.8]);
-        
-        PYRAMID.draw(gl, program, mode);
+    function LargeRotor(){
+        multRotationY(2.5 * helicopter.bladeVelocity);
+        multScale([1.5,1.5,1.5]);
+        Rotor();
     }
 
     function SpiderLeg(){
         pushMatrix();
             multRotationZ(120);
-            SpiderLegSegment();
+            multScale([0.1, 1.5, 0.1]);
+            Pyramid([0.1, 0.2, 0.8]);
         popMatrix();
         pushMatrix();
             multTranslation([0.9,-0.28,0]);
             multRotationZ(-160);
-            SpiderLegSegment();
+            multScale([0.1, 1.5, 0.1]);
+            Pyramid([0.1, 0.2, 0.8]);
+        popMatrix();
+    }
+
+    function Cabin(){
+        multScale([2.6, 1.5, 1.5]);
+        Sphere([1, 0.2, 0.3]);
+    }
+
+    function OppositeLeg(translation, rotation){
+        pushMatrix();
+        multTranslation([translation[0], translation[1], -translation[2]]);
+        multRotationY(rotation + (180 - rotation) * 2);
+        SpiderLeg();
         popMatrix();
     }
 
@@ -220,61 +257,35 @@ function setup(shaders)
             multRotationY(150);
             SpiderLeg();
         popMatrix();
+            OppositeLeg([-0.8,0,-0.7], 150);
         pushMatrix();
             multTranslation([-0.3,0,-0.9]);
             multRotationY(120);
             SpiderLeg();
         popMatrix();
+            OppositeLeg([-0.3,0,-0.9], 120);
         pushMatrix();
             multTranslation([0.3,0,-0.9]);
             multRotationY(80);
             SpiderLeg();
         popMatrix();
+            OppositeLeg([0.3,0,-0.9], 80);
         pushMatrix();
             multTranslation([0.8,0,-0.7]);
             multRotationY(40);
             SpiderLeg();
         popMatrix();
-        pushMatrix();
-            multTranslation([-0.8,0,0.7]);
-            multRotationY(150 + (180-150)*2);
-            SpiderLeg();
-        popMatrix();
-        pushMatrix();
-            multTranslation([-0.3,0,0.9]);
-            multRotationY(120 + (180-120)*2);
-            SpiderLeg();
-        popMatrix();
-        pushMatrix();
-            multTranslation([0.3,0,0.9]);
-            multRotationY(80 + (180 - 80)*2);
-            SpiderLeg();
-        popMatrix();
-        pushMatrix();
-            multTranslation([0.8,0,0.7]);
-            multRotationY(40 + (180 - 40)*2);
-            SpiderLeg();
-        popMatrix();
+            OppositeLeg([0.8,0,-0.7], 40);
     }
 
     function TailConnector(){
         multScale([2.4, 0.3, 0.3]);
-        
-        // Send the current modelview matrix to the vertex shader
-        uploadModelView();
-
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [1, 0.2, 0.3]);
-        SPHERE.draw(gl, program, mode);
+        Sphere([1, 0.2, 0.3]);
     }
 
     function TailEnd(){
         multScale([0.35, 0.7, 0.2]);
-        uploadModelView();
-
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [1, 0.2, 0.3]);
-        SPHERE.draw(gl, program, mode);
+        Sphere([1, 0.2, 0.3]);
     }
 
     function Tail(){
@@ -291,19 +302,7 @@ function setup(shaders)
         popMatrix();
     }
 
-    function Cabin(){
-        multScale([2.6, 1.5, 1.5]);
-        
-        // Send the current modelview matrix to the vertex shader
-        uploadModelView();
-
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [1, 0.2, 0.3]);
-        SPHERE.draw(gl, program, mode);
-    }
-
     function MainBody(){
-        
         pushMatrix();
             CabinWithLegs();
         popMatrix();
@@ -353,60 +352,9 @@ function setup(shaders)
         CUBE.draw(gl, program, mode);
     }
 
-    function Cube(color){
-        uploadModelView();
-        
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, color);
-
-        CUBE.draw(gl, program, mode);
-    }
-
-    function Pyramid(color){
-        uploadModelView();
-        
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, color);
-
-        PYRAMID.draw(gl, program, mode);
-    }
-
-    function Cylinder(color){
-        uploadModelView();
-        
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, color);
-
-        CYLINDER.draw(gl, program, mode);
-    }
-
-    function Sphere(color){
-        uploadModelView();
-
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, color);
-
-        SPHERE.draw(gl, program, mode);
-    }
-
-    function Torus(color){
-        uploadModelView();
-        
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, color);
-
-        TORUS.draw(gl, program, mode);
-    }
-
     function Window(){
         multScale([5.05, 1.2, 1.2]);
-
-        uploadModelView();
-        
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [1,1,0.3]);
-
-        CUBE.draw(gl, program, mode);
+        Cube([1,1,0.3]);
     }
 
     function BuildingBlock(color){
@@ -429,7 +377,7 @@ function setup(shaders)
             }
     }
 
-    function Building1(){
+    function StandardBuilding(){
         pushMatrix();
             multScale([1.5,2,1.5]);
             BuildingBlock([0.8,0.8,0.8]);
@@ -529,7 +477,7 @@ function setup(shaders)
     function Buildings(){
         pushMatrix();
             multTranslation([-32,5,32]);
-            Building1();
+            StandardBuilding();
         popMatrix();
         pushMatrix();
             multTranslation([25,6.3,-30]);
@@ -591,7 +539,7 @@ function setup(shaders)
         popMatrix();
     }
 
-    function Lake(){
+    function River(){
         pushMatrix();
             multRotationY(40);
             multScale([30,0.6,35]);
@@ -610,24 +558,19 @@ function setup(shaders)
             Trees();
         popMatrix();
         pushMatrix();
-            Lake();
+            River();
         popMatrix();
     }
 
-    // OTHERS _________________________________________________________________
+    // BOXES _________________________________________________________________
     
     function Box(box)
     {
         multRotationY(box.trajectory);
         multTranslation(box.pos);
-        multScale([0.7, 0.7, 0.7]);
+        multScale([0.7, 0.7, 0.7]);    
+        Cube([1,1,1]);
         console.log(box.pos);
-        // Send the current modelview matrix to the vertex shader
-        uploadModelView();
-
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [1, 1, 1]);
-        CUBE.draw(gl, program, mode);
     } 
 
     function Boxes(){
@@ -644,6 +587,8 @@ function setup(shaders)
         }
     }
 
+    // FULL SCENE ______________________________________________________________
+
     function FullScene()
     { 
          //por a frente apontada para z positivo. a frente estava apontada para x negativo.
@@ -659,6 +604,8 @@ function setup(shaders)
         popMatrix();
         
     }
+
+    //___________________________________________________________________________________
     
     function render(millisecs)
     {
@@ -683,6 +630,8 @@ function setup(shaders)
 
         FullScene();
     }
+
+    // AUXILIARY FUNCTIONS __________________________________________________________
 
     function isTouchingGround(){
         return helicopter.ascension <= GROUND_LEVEL;
@@ -740,6 +689,11 @@ function setup(shaders)
         }
     }
 
+    function frontView(){
+        mView = lookAt([0,0,VP_DISTANCE],[0,0,0],[0,1,0]);
+        loadMatrix(mView);
+    }
+
     function hideSliders(){
         thetaSlider.style.display = "none";
         gammaSlider.style.display = "none";
@@ -750,11 +704,6 @@ function setup(shaders)
         gammaSlider.style.display = "block";
       /*  console.log(thetaSlider.value);
         console.log(gammaSlider.value);*/
-    }
-
-    function frontView(){
-        mView = lookAt([0,0,VP_DISTANCE],[0,0,0],[0,1,0]);
-        loadMatrix(mView);
     }
 }
 
