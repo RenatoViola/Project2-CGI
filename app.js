@@ -30,7 +30,7 @@ const MIN_INCLINATION = 0;
 const MAX_ACCELERATION = 1;
 const MIN_ACCELERATION = 0;
 
-const VP_DISTANCE = 45;
+const VP_DISTANCE = 40;
 
 function setup(shaders)
 {
@@ -322,16 +322,12 @@ function setup(shaders)
     }
 
     function Helicopter(){
-        
         multRotationY(helicopter.trajectory);
-        
         multTranslation([0,helicopter.ascension,-25]); 
-
         //detalhinho extra
         multRotationX(helicopter.inclination);
         //_______________________
         multRotationZ(helicopter.inclination);
-
         MainBody();
 
         //------------------------------------
@@ -345,11 +341,7 @@ function setup(shaders)
     function Ground()
     {
         multScale([75.0, 0.2,75.0]);
-
-        uploadModelView();
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor,[0.1,0.5,0.4]);
-        CUBE.draw(gl, program, mode);
+        Cube([0.1,0.5,0.4]);
     }
 
     function Window(){
@@ -701,7 +693,7 @@ function setup(shaders)
     function showSliders(){
         document.getElementById("sliders").style.display = "block";
       /*  console.log(thetaSlider.value);
-        console.log(gammaSlider.value);*/
+        console.log(gammaSlider.value); */
     }
 }
 
