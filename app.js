@@ -20,6 +20,7 @@ let mView;
 let helicopter = {ascension: 1, acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
 let heliPos;
 let boxes = [];
+let isSpeedingUp = false;
 let thetaSlider = document.getElementById("theta");
 let gammaSlider = document.getElementById("gamma");
 
@@ -61,28 +62,17 @@ function setup(shaders)
                     helicopter.ascension += 0.2;
                 break;
             case 'ArrowDown':
-                if(!isTouchingGround())
-                    helicopter.ascension -= 0.2;
-                if(helicopter.ascension < 6 && helicopter.inclination > MIN_INCLINATION){
-                    helicopter.inclination -= Math.log(helicopter.ascension) * 1.1;
-                    if(helicopter.acceleration > MIN_ACCELERATION)
-                        helicopter.acceleration -= 0.02;
-                }
+                descend();
                 liftOff();
                 break;
-            case 'ArrowRight':
+         /*   case 'ArrowRight':
                 if(helicopter.acceleration > MIN_ACCELERATION && !isTouchingGround())
                     helicopter.acceleration -= 0.02;
                 if(helicopter.inclination > MIN_INCLINATION && !isTouchingGround())
                     helicopter.inclination -= 1;
-                break;
+                break; */
             case 'ArrowLeft':
-                if(helicopter.ascension >= 6){
-                    if(helicopter.acceleration < MAX_ACCELERATION && !isTouchingGround())
-                        helicopter.acceleration += 0.02;
-                    if(helicopter.inclination < MAX_INCLINATION && !isTouchingGround())
-                        helicopter.inclination += 1;
-                }
+                increaseSpeed();
                 break;
             case ' ':
                 drop();
@@ -107,6 +97,11 @@ function setup(shaders)
                 projectionState = 5;
                 break;
         }
+    }
+
+    document.onkeyup = function(event) {
+        if(event.key == 'ArrowLeft')
+            isSpeedingUp = false;
     }
 
     gl.clearColor(0.3, 1, 1, 1.0);
@@ -185,7 +180,7 @@ function setup(shaders)
     // HELICOPTER ___________________________________________________________
 
     function RotorBlade(){
-        multScale([1.5, 0.05, 0.2]);
+        multScale([1.5, 0.1, 0.2]);
         Sphere([1.0, 1.0, 1.0]);
     }
 
@@ -610,6 +605,8 @@ function setup(shaders)
 
         time = millisecs / 1000;
 
+        decreaseSpeed();
+
         growOld();
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -624,6 +621,35 @@ function setup(shaders)
     }
 
     // AUXILIARY FUNCTIONS __________________________________________________________
+    
+    function increaseSpeed(){
+        isSpeedingUp = true;
+        if(helicopter.ascension >= 5){
+            if(helicopter.acceleration < MAX_ACCELERATION && !isTouchingGround())
+                helicopter.acceleration += 0.02;
+            if(helicopter.inclination < MAX_INCLINATION && !isTouchingGround())
+                helicopter.inclination += 1;
+        }
+    }
+
+    function decreaseSpeed(){
+        if(!isSpeedingUp){
+            if(helicopter.acceleration > MIN_ACCELERATION && !isTouchingGround())
+                helicopter.acceleration -= 0.002;
+            if(helicopter.inclination > MIN_INCLINATION && !isTouchingGround())
+                helicopter.inclination -= 0.1;
+        }
+    }
+
+    function descend(){
+        if(!isTouchingGround())
+            helicopter.ascension -= 0.2;
+            if(helicopter.ascension < 5 && helicopter.inclination > MIN_INCLINATION){
+                helicopter.inclination -= Math.log(helicopter.ascension);
+                if(helicopter.acceleration > MIN_ACCELERATION)
+                    helicopter.acceleration -= 0.02;
+            }
+    }
 
     function isTouchingGround(){
         return helicopter.ascension <= GROUND_LEVEL;
