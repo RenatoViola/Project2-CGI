@@ -432,19 +432,32 @@ function setup(shaders)
     function Building1(){
         pushMatrix();
             multScale([1.5,2,1.5]);
-            BuildingBlock([0.5,0.5,0.5]);
+            BuildingBlock([0.8,0.8,0.8]);
         popMatrix();
         pushMatrix();
             multTranslation([0,8.4,0])
             multScale([1.5,2,1.5]);
-            BuildingBlock([0.5,0.5,0.5]);
+            BuildingBlock([0.8,0.8,0.8]);
         popMatrix();
-    }
-
-    function Building2(){
         pushMatrix();
-            multScale([2,2.5,1.5]);
-            BuildingBlock([0.5,0.5,0.5]);
+            multTranslation([0,0,-7.5]);
+            multScale([1.5,2,1.5]);
+            BuildingBlock([0.65,0.65,0.65]);
+            pushMatrix();
+                multTranslation([0,3,0]);
+                multScale([5,1,5]);
+                Pyramid([0.7,0.1,0.1]);
+            popMatrix();
+        popMatrix();
+        pushMatrix();
+            multTranslation([7.5,0,0]);
+            multScale([1.5,2,1.5]);
+            BuildingBlock([0.65,0.65,0.65]);
+            pushMatrix();
+                multTranslation([0,3,0]);
+                multScale([5,1,5]);
+                Pyramid([0.7,0.1,0.1]);
+            popMatrix();
         popMatrix();
     }
 
@@ -459,9 +472,20 @@ function setup(shaders)
             BuildingBlock([0.6,0.6,0.6]);
         popMatrix();
         pushMatrix();
-            multTranslation([0,18,0]);
-            multScale([4,8,4]);
-            Pyramid([0.3,0.4,0.4]);
+            multTranslation([0,17,0]);
+            multScale([3,5,3]);
+            Cube([0.27,0.24,0.5]);
+        popMatrix();
+        pushMatrix();
+            multRotationY(45);
+            multTranslation([0,17,0]);
+            multScale([3,5,3]);
+            Cube([0.27,0.24,0.5]);
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,20.5,0]);
+            multScale([1,2,1]);
+            Pyramid([1,0,0]);
         popMatrix();
     }
 
@@ -506,10 +530,6 @@ function setup(shaders)
         pushMatrix();
             multTranslation([-32,5,32]);
             Building1();
-        popMatrix();
-        pushMatrix();
-            multTranslation([-24,6.3,32]);
-            Building2();
         popMatrix();
         pushMatrix();
             multTranslation([25,6.3,-30]);
@@ -606,7 +626,7 @@ function setup(shaders)
         uploadModelView();
 
         const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, [0.7, 0.6, 0]);
+        gl.uniform3fv(uColor, [1, 1, 1]);
         CUBE.draw(gl, program, mode);
     } 
 
@@ -662,7 +682,6 @@ function setup(shaders)
         enactProjection();
 
         FullScene();
-       //Helicopter();
     }
 
     function isTouchingGround(){
