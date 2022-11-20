@@ -718,8 +718,8 @@ function setup(shaders)
 
     function showSliders(){
         document.getElementById("sliders").style.display = "block";
-      /*  console.log(thetaSlider.value);
-        console.log(gammaSlider.value); */
+        console.log(thetaSlider.value);
+        console.log(gammaSlider.value); 
     }
 }
 
