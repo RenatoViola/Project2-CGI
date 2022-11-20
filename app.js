@@ -24,8 +24,8 @@ let isSpeedingUp = false;
 let thetaSlider = document.getElementById("theta");
 let gammaSlider = document.getElementById("gamma");
 
-const MAX_HEIGHT = 27;
-const GROUND_LEVEL = 1;
+const MAX_HEIGHT = 28;
+const SAFE_HEIGHT = 5;
 const MAX_INCLINATION = 30;
 const MIN_INCLINATION = 0;
 const MAX_ACCELERATION = 1;
@@ -555,7 +555,7 @@ function setup(shaders)
     {
         multRotationY(box.trajectory);
         multTranslation(box.pos);
-        multScale([0.7, 0.7, 0.7]);    
+        multScale([0.8, 0.8, 0.8]);    
         Cube([1,1,1]);
         console.log(box.pos);
     } 
@@ -564,10 +564,10 @@ function setup(shaders)
         for(let i = 0; i < boxes.length; i++){
             const box = boxes[i];
                 const age = time - boxes[i].timeOfCreation;
-                if(box.pos[1] - 3 * age > GROUND_LEVEL - 0.6)
+                if(box.pos[1] - 3 * age > 0.5)
                     box.pos[1] -= 3 * age;
                 else
-                    box.pos[1] = GROUND_LEVEL - 0.6;
+                    box.pos[1] = 0.5;
             pushMatrix();
                 Box(box);
             popMatrix();
@@ -624,7 +624,7 @@ function setup(shaders)
     
     function increaseSpeed(){
         isSpeedingUp = true;
-        if(helicopter.ascension >= 5){
+        if(helicopter.ascension >= SAFE_HEIGHT){
             if(helicopter.acceleration < MAX_ACCELERATION && !isTouchingGround())
                 helicopter.acceleration += 0.02;
             if(helicopter.inclination < MAX_INCLINATION && !isTouchingGround())
@@ -644,15 +644,15 @@ function setup(shaders)
     function descend(){
         if(!isTouchingGround())
             helicopter.ascension -= 0.2;
-            if(helicopter.ascension < 5 && helicopter.inclination > MIN_INCLINATION){
-                helicopter.inclination -= Math.log(helicopter.ascension);
-                if(helicopter.acceleration > MIN_ACCELERATION)
-                    helicopter.acceleration -= 0.02;
-            }
+        if(helicopter.ascension < SAFE_HEIGHT && helicopter.inclination > MIN_INCLINATION){
+            helicopter.inclination -= Math.log(helicopter.ascension);
+            if(helicopter.acceleration > MIN_ACCELERATION)
+                helicopter.acceleration -= 0.02;
+        }
     }
 
     function isTouchingGround(){
-        return helicopter.ascension <= GROUND_LEVEL;
+        return helicopter.ascension <= 1;
     }
 
     function liftOff(){
