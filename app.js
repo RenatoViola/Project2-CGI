@@ -16,7 +16,6 @@ let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let time = 0;
 let projectionState = 1;
 let mView;
-//let helicopter = {pos: [0, 0, 0], acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
 let helicopter = {ascension: 1, acceleration: 0, trajectory: 0, inclination: 0, bladeVelocity: 0};
 let heliPos;
 let boxes = [];
@@ -30,7 +29,6 @@ const MAX_INCLINATION = 30;
 const MIN_INCLINATION = 0;
 const MAX_ACCELERATION = 1;
 const MIN_ACCELERATION = 0;
-
 const VP_DISTANCE = 40;
 
 function setup(shaders)
@@ -49,7 +47,8 @@ function setup(shaders)
     resize_canvas();
     window.addEventListener("resize", resize_canvas);
 
-    document.onkeydown = function(event) {
+    document.onkeydown = function(event) 
+    {
         switch(event.key) {
             case 'w':
                 mode = gl.LINES; 
@@ -65,12 +64,6 @@ function setup(shaders)
                 descend();
                 liftOff();
                 break;
-         /*   case 'ArrowRight':
-                if(helicopter.acceleration > MIN_ACCELERATION && !isTouchingGround())
-                    helicopter.acceleration -= 0.02;
-                if(helicopter.inclination > MIN_INCLINATION && !isTouchingGround())
-                    helicopter.inclination -= 1;
-                break; */
             case 'ArrowLeft':
                 increaseSpeed();
                 break;
@@ -99,7 +92,8 @@ function setup(shaders)
         }
     }
 
-    document.onkeyup = function(event) {
+    document.onkeyup = function(event) 
+    {
         if(event.key == 'ArrowLeft')
             isSpeedingUp = false;
     }
@@ -132,7 +126,8 @@ function setup(shaders)
 
     // BASIC OBJECTS ________________________________________________________
 
-    function Cube(color){
+    function Cube(color)
+    {
         uploadModelView();
         
         const uColor = gl.getUniformLocation(program, "uColor");
@@ -141,7 +136,8 @@ function setup(shaders)
         CUBE.draw(gl, program, mode);
     }
 
-    function Pyramid(color){
+    function Pyramid(color)
+    {
         uploadModelView();
         
         const uColor = gl.getUniformLocation(program, "uColor");
@@ -150,7 +146,8 @@ function setup(shaders)
         PYRAMID.draw(gl, program, mode);
     }
 
-    function Cylinder(color){
+    function Cylinder(color)
+    {
         uploadModelView();
         
         const uColor = gl.getUniformLocation(program, "uColor");
@@ -159,7 +156,8 @@ function setup(shaders)
         CYLINDER.draw(gl, program, mode);
     }
 
-    function Sphere(color){
+    function Sphere(color)
+    {
         uploadModelView();
 
         const uColor = gl.getUniformLocation(program, "uColor");
@@ -168,7 +166,8 @@ function setup(shaders)
         SPHERE.draw(gl, program, mode);
     }
 
-    function Torus(color){
+    function Torus(color)
+    {
         uploadModelView();
         
         const uColor = gl.getUniformLocation(program, "uColor");
@@ -179,17 +178,20 @@ function setup(shaders)
 
     // HELICOPTER ___________________________________________________________
 
-    function RotorBlade(){
+    function RotorBlade()
+    {
         multScale([1.5, 0.1, 0.2]);
         Sphere([1.0, 1.0, 1.0]);
     }
 
-    function RotorPivot(){
+    function RotorPivot()
+    {
         multScale([0.1, 0.4, 0.1]);
         Cylinder([0.5, 0.5, 0.5]);
     }
 
-    function Rotor(){
+    function Rotor()
+    {
         pushMatrix();
             RotorPivot();
         popMatrix();
@@ -203,103 +205,102 @@ function setup(shaders)
         popMatrix();
     }
 
-    function SmallRotor(){
+    function SmallRotor()
+    {
         multRotationX(90);
-        multRotationY(-2.5 * helicopter.bladeVelocity);
+        multRotationY(-helicopter.bladeVelocity);
         multScale([0.7,0.7,0.7]);
         Rotor();
     }
 
-    function LargeRotor(){
-        multRotationY(2.5 * helicopter.bladeVelocity);
+    function LargeRotor()
+    {
+        multRotationY(helicopter.bladeVelocity);
         multScale([1.5,1.5,1.5]);
         Rotor();
     }
 
-    function SpiderLeg(){
+    function SpiderLeg(translation, rotation)
+    {
         pushMatrix();
-            multRotationZ(120);
-            multScale([0.1, 1.5, 0.1]);
-            Pyramid([0.1, 0.2, 0.8]);
-        popMatrix();
-        pushMatrix();
-            multTranslation([0.9,-0.28,0]);
-            multRotationZ(-160);
-            multScale([0.1, 1.5, 0.1]);
-            Pyramid([0.1, 0.2, 0.8]);
-        popMatrix();
-    }
-
-    function Cabin(){
-        multScale([2.6, 1.5, 1.5]);
-        Sphere([1, 0.2, 0.3]);
-    }
-
-    function OppositeLeg(translation, rotation){
-        pushMatrix();
-        multTranslation([translation[0], translation[1], -translation[2]]);
-        multRotationY(rotation + (180 - rotation) * 2);
-        SpiderLeg();
-        popMatrix();
-    }
-
-    function CabinWithLegs(){
-        pushMatrix();
-            Cabin();
-        popMatrix();
-        pushMatrix();
-            multTranslation([-0.8,0,-0.7]);
-            multRotationY(150);
-            SpiderLeg();
-        popMatrix();
-            OppositeLeg([-0.8,0,-0.7], 150);
-        pushMatrix();
-            multTranslation([-0.3,0,-0.9]);
-            multRotationY(120);
-            SpiderLeg();
-        popMatrix();
-            OppositeLeg([-0.3,0,-0.9], 120);
-        pushMatrix();
-            multTranslation([0.3,0,-0.9]);
-            multRotationY(80);
-            SpiderLeg();
-        popMatrix();
-            OppositeLeg([0.3,0,-0.9], 80);
-        pushMatrix();
-            multTranslation([0.8,0,-0.7]);
-            multRotationY(40);
-            SpiderLeg();
-        popMatrix();
-            OppositeLeg([0.8,0,-0.7], 40);
-    }
-
-    function TailConnector(){
-        multScale([2.4, 0.3, 0.3]);
-        Sphere([1, 0.2, 0.3]);
-    }
-
-    function TailEnd(){
-        multScale([0.35, 0.7, 0.2]);
-        Sphere([1, 0.2, 0.3]);
-    }
-
-    function Tail(){
-        pushMatrix();
-            TailConnector();
-        popMatrix();
-        pushMatrix();
-            multTranslation([1.1,0.3,0.0]);
-            TailEnd();
+            multTranslation(translation);
+            multRotationY(rotation);
             pushMatrix();
-                multTranslation([0.0,0.0,0.6]);
-                SmallRotor();
+                multRotationZ(120);
+                multScale([0.1, 1.5, 0.1]);
+                Pyramid([0.1, 0.2, 0.8]);
+            popMatrix();
+            pushMatrix();
+                multTranslation([0.9,-0.28,0]);
+                multRotationZ(-160);
+                multScale([0.1, 1.5, 0.1]);
+                Pyramid([0.1, 0.2, 0.8]);
             popMatrix();
         popMatrix();
     }
 
-    function MainBody(){
+    function OppositeLeg(translation, rotation)
+    {
+        const oppositeTranslation = [translation[0], translation[1], -translation[2]];
+        const oppositeRotation = rotation + (180 - rotation) * 2;
+        
+        SpiderLeg(oppositeTranslation, oppositeRotation);
+    }
+
+    function Legs()
+    {
+        SpiderLeg([-0.8,0,-0.7], 150);
+        OppositeLeg([-0.8,0,-0.7], 150);
+        SpiderLeg([-0.3,0,-0.9], 120);
+        OppositeLeg([-0.3,0,-0.9], 120);
+        SpiderLeg([0.3,0,-0.9], 80);
+        OppositeLeg([0.3,0,-0.9], 80);
+        SpiderLeg([0.8,0,-0.7], 40);
+        OppositeLeg([0.8,0,-0.7], 40);
+    }
+
+    function TailConnector()
+    {
+        multScale([2.4, 0.3, 0.3]);
+        Sphere([1, 0.2, 0.3]);
+    }
+
+    function TailEnd()
+    {
+        multTranslation([1.1,0.3,0]);
+        multScale([0.35, 0.7, 0.2]);
         pushMatrix();
-            CabinWithLegs();
+            Sphere([1, 0.2, 0.3]);
+        popMatrix();
+     //   pushMatrix();
+            multTranslation([0,0,0.6]);
+            SmallRotor();
+     //   popMatrix();
+    }
+
+    function Tail()
+    {
+        pushMatrix();
+            TailConnector();
+        popMatrix();
+        pushMatrix();
+            TailEnd();
+        popMatrix();
+    }
+
+    function Cabin()
+    {
+        multScale([2.6, 1.5, 1.5]);
+        Sphere([1, 0.2, 0.3]);
+    }
+
+    function MainBody()
+    {
+        pushMatrix();
+            Cabin();
+        popMatrix();
+        pushMatrix();
+            Legs();
         popMatrix();
         pushMatrix();
             multTranslation([0,1,0]);
@@ -316,7 +317,8 @@ function setup(shaders)
         popMatrix();
     }
 
-    function Helicopter(){
+    function Helicopter()
+    {
         multRotationY(helicopter.trajectory);
         multTranslation([0,helicopter.ascension,-25]); 
         //detalhinho extra
@@ -339,12 +341,14 @@ function setup(shaders)
         Cube([0.1,0.5,0.4]);
     }
 
-    function Window(){
+    function Window()
+    {
         multScale([5.05, 1.2, 1.2]);
         Cube([1,1,0.3]);
     }
 
-    function BuildingBlock(color){
+    function BuildingBlock(color)
+    {
         pushMatrix();
             multScale([5,5,5]);
             Cube(color);
@@ -364,7 +368,8 @@ function setup(shaders)
             }
     }
 
-    function StandardBuilding(){
+    function StandardBuilding()
+    {
         pushMatrix();
             multScale([1.5,2,1.5]);
             BuildingBlock([0.8,0.8,0.8]);
@@ -396,7 +401,8 @@ function setup(shaders)
         popMatrix();
     }
 
-    function Skyscraper(){
+    function Skyscraper()
+    {
         pushMatrix();
             multScale([1.5,2.5,1.5]);
             BuildingBlock([0.5,0.5,0.5]);
@@ -424,7 +430,8 @@ function setup(shaders)
         popMatrix();
     }
 
-    function LuxuryBuilding(){
+    function LuxuryBuilding()
+    {
         pushMatrix();
             multScale([3,3,3]);
             BuildingBlock([0.5,0.7,0.7]);
@@ -461,7 +468,8 @@ function setup(shaders)
         popMatrix();
     }
 
-    function Buildings(){
+    function Buildings()
+    {
         pushMatrix();
             multTranslation([-32,5,32]);
             StandardBuilding();
@@ -477,56 +485,41 @@ function setup(shaders)
         popMatrix();
     }
 
-    function Tree(){
+    function Tree(translation)
+    {
         pushMatrix();
-            multTranslation([0,2.7,0]);
-            multScale([3,3.5,3]);
-            Pyramid([0,0.4,0]);
-        popMatrix();
-        pushMatrix();
-            multTranslation([0,2.7,0]);
-            multRotationY(45);
-            multScale([3,3.5,3]);
-            Pyramid([0,0.5,0]);
-        popMatrix();
-        pushMatrix();
-            multScale([0.5,2,0.5]);
-            Cube([0.3,0.2,0]);
-        popMatrix();
-    }
-
-    function Trees(){
-        pushMatrix();
-            multTranslation([-33,1,-33]);
-            Tree();
-        popMatrix();
-        pushMatrix();
-            multTranslation([-29,1,-30]);
-            Tree();
-        popMatrix();
-        pushMatrix();
-            multTranslation([-32,1,-22]);
-            Tree();
-        popMatrix();
-        pushMatrix();
-            multTranslation([30,1,33]);
-            Tree();
-        popMatrix();
-        pushMatrix();
-            multTranslation([27,1,25]);
-            Tree();
-        popMatrix();
-        pushMatrix();
-            multTranslation([22,1,29]);
-            Tree();
-        popMatrix();
-        pushMatrix();
-            multTranslation([33,1,15]);
-            Tree();
+            multTranslation(translation);
+            pushMatrix();
+                multTranslation([0,2.7,0]);
+                multScale([3,3.5,3]);
+                Pyramid([0,0.4,0]);
+            popMatrix();
+            pushMatrix();
+                multTranslation([0,2.7,0]);
+                multRotationY(45);
+                multScale([3,3.5,3]);
+                Pyramid([0,0.5,0]);
+            popMatrix();
+            pushMatrix();
+                multScale([0.5,2,0.5]);
+                Cube([0.3,0.2,0]);
+            popMatrix();
         popMatrix();
     }
 
-    function River(){
+    function Trees()
+    {
+        Tree([-33,1,-33]);
+        Tree([-29,1,-30]);
+        Tree([-32,1,-22]);
+        Tree([30,1,33]);
+        Tree([27,1,25]);
+        Tree([22,1,29]);
+        Tree([33,1,15]);
+    }
+
+    function River()
+    {
         pushMatrix();
             multRotationY(40);
             multScale([30,0.6,35]);
@@ -534,7 +527,8 @@ function setup(shaders)
         popMatrix();
     }
 
-    function City(){
+    function City()
+    {
         pushMatrix();
             Ground();
         popMatrix();
@@ -560,7 +554,8 @@ function setup(shaders)
         console.log(box.pos);
     } 
 
-    function Boxes(){
+    function Boxes()
+    {
         for(let i = 0; i < boxes.length; i++){
             const box = boxes[i];
                 const age = time - boxes[i].timeOfCreation;
@@ -598,7 +593,7 @@ function setup(shaders)
     {
         if(!isTouchingGround()){
             helicopter.trajectory += helicopter.acceleration;
-            helicopter.bladeVelocity += helicopter.acceleration + 1.5;
+            helicopter.bladeVelocity += (helicopter.acceleration + 1.5) * 2.5;
         }
 
         window.requestAnimationFrame(render);
@@ -622,7 +617,8 @@ function setup(shaders)
 
     // AUXILIARY FUNCTIONS __________________________________________________________
     
-    function increaseSpeed(){
+    function increaseSpeed()
+    {
         isSpeedingUp = true;
         if(helicopter.ascension >= SAFE_HEIGHT){
             if(helicopter.acceleration < MAX_ACCELERATION && !isTouchingGround())
@@ -632,7 +628,8 @@ function setup(shaders)
         }
     }
 
-    function decreaseSpeed(){
+    function decreaseSpeed()
+    {
         if(!isSpeedingUp){
             if(helicopter.acceleration > MIN_ACCELERATION && !isTouchingGround())
                 helicopter.acceleration -= 0.002;
@@ -641,32 +638,37 @@ function setup(shaders)
         }
     }
 
-    function descend(){
+    function descend()
+    {
         if(!isTouchingGround())
             helicopter.ascension -= 0.2;
         if(helicopter.ascension < SAFE_HEIGHT && helicopter.inclination > MIN_INCLINATION){
             helicopter.inclination -= Math.log(helicopter.ascension);
-            if(helicopter.acceleration > MIN_ACCELERATION)
-                helicopter.acceleration -= 0.02;
+         /*   if(helicopter.acceleration > MIN_ACCELERATION)
+                helicopter.acceleration -= 0.01; */
         }
     }
 
-    function isTouchingGround(){
+    function isTouchingGround()
+    {
         return helicopter.ascension <= 1;
     }
 
-    function liftOff(){
+    function liftOff()
+    {
         if(isTouchingGround())
             helicopter.acceleration = 0;
     }
 
-    function growOld(){
+    function growOld()
+    {
         for(let i = 0; i < boxes.length; i++)   
             if(time - boxes[i].timeOfCreation >= 5)
                 boxes.shift();
     }
 
-    function drop(){
+    function drop()
+    {
         const boxPos = [0, helicopter.ascension, -25];
         let box = {pos: boxPos, timeOfCreation: time, trajectory: helicopter.trajectory}; 
       //  let box = {pos: heliPos, timeOfCreation: time};
@@ -674,7 +676,8 @@ function setup(shaders)
         console.log(boxes);
     }
 
-    function enactProjection(){
+    function enactProjection()
+    {
         switch(projectionState){
             case 1:
                 frontView();
@@ -707,19 +710,22 @@ function setup(shaders)
         }
     }
 
-    function frontView(){
+    function frontView()
+    {
         mView = lookAt([0,0,VP_DISTANCE],[0,0,0],[0,1,0]);
         loadMatrix(mView);
     }
 
-    function hideSliders(){
+    function hideSliders()
+    {
         document.getElementById("sliders").style.display = "none";
     }
 
-    function showSliders(){
+    function showSliders()
+    {
         document.getElementById("sliders").style.display = "block";
-        console.log(thetaSlider.value);
-        console.log(gammaSlider.value); 
+      /*  console.log(thetaSlider.value);
+        console.log(gammaSlider.value); */
     }
 }
 
