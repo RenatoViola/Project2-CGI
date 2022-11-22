@@ -302,8 +302,6 @@ function setup(shaders)
         //detalhinho extra
         multRotationX(heli.inclination);
         multRotationZ(heli.inclination);
-        
-
         //------------------------------------
         const mModel = mult(inverse(mView), modelView());
         heliPos = mult(mModel, [0,0,0,1]); 
@@ -313,13 +311,18 @@ function setup(shaders)
 
         // BOXES _________________________________________________________________
     
+        function drop()
+        {
+          //  worldPos = mult(inverse(mView), mult(modelView(), heliPos));
+            let box = {pos: heliPos.slice(0,3), timeOfCreation: time};
+            boxes.push(box);
+        }
+        
         function Box(box)
         {
-         //   multRotationY(-90);
             multTranslation(box.pos);  
             multScale([0.8, 0.8, 0.8]);    
             Cube([1,1,1]);
-            console.log(box.pos);
         } 
     
         function Boxes()
@@ -335,14 +338,6 @@ function setup(shaders)
                     Box(box);
                 popMatrix();
             }
-        }
-    
-        function drop()
-        {
-            let box = {pos: heliPos.slice(0,3), timeOfCreation: time};
-            
-            boxes.push(box);
-            console.log(boxes);
         }
         
     // CITY ___________________________________________________________________
@@ -617,8 +612,6 @@ function setup(shaders)
             if(time - boxes[i].timeOfCreation >= 5)
                 boxes.shift();
     }
-
-
 
     function enactProjection()
     {
