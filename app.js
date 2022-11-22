@@ -1,5 +1,5 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
-import { ortho, lookAt, flatten, inverse, mult} from "../../libs/MV.js";
+import { ortho, lookAt, flatten, inverse, mult, rotateX, rotateY, rotateZ} from "../../libs/MV.js";
 import {modelView, loadMatrix, multRotationX, multRotationY, multRotationZ, multScale, pushMatrix, popMatrix, multTranslation } from "../../libs/stack.js";
 
 import * as SPHERE from '../../libs/objects/sphere.js';
@@ -298,18 +298,53 @@ function setup(shaders)
     function Helicopter()
     {
         multRotationY(heli.trajectory);
-        multTranslation([0,heli.ascension,-25]); 
+        multTranslation([0,heli.ascension,-30]); 
         //detalhinho extra
         multRotationX(heli.inclination);
         multRotationZ(heli.inclination);
-        MainBody();
+        
 
         //------------------------------------
-        let mModel = mult(inverse(mView), modelView());
+        const mModel = mult(inverse(mView), modelView());
         heliPos = mult(mModel, [0,0,0,1]); 
         //------------------------------------
+        MainBody();
     }
 
+        // BOXES _________________________________________________________________
+    
+        function Box(box)
+        {
+         //   multRotationY(-90);
+            multTranslation(box.pos);  
+            multScale([0.8, 0.8, 0.8]);    
+            Cube([1,1,1]);
+            console.log(box.pos);
+        } 
+    
+        function Boxes()
+        {
+            for(let i = 0; i < boxes.length; i++){
+                const box = boxes[i];
+                    const age = time - boxes[i].timeOfCreation;
+                    if(box.pos[1] - 3 * age > 0.5)
+                        box.pos[1] -= 3 * age;
+                    else
+                        box.pos[1] = 0.5;
+                pushMatrix();
+                    Box(box);
+                popMatrix();
+            }
+        }
+    
+        function drop()
+        {
+            let box = {pos: heliPos.slice(0,3), timeOfCreation: time};
+            
+            boxes.push(box);
+            console.log(boxes);
+        }
+        
     // CITY ___________________________________________________________________
 
     function Ground()
@@ -492,38 +527,10 @@ function setup(shaders)
         River();
     }
 
-    // BOXES _________________________________________________________________
-    
-    function Box(box)
-    {
-        multRotationY(box.trajectory);
-        multTranslation(box.pos);
-        multScale([0.8, 0.8, 0.8]);    
-        Cube([1,1,1]);
-        console.log(box.pos);
-    } 
-
-    function Boxes()
-    {
-        for(let i = 0; i < boxes.length; i++){
-            const box = boxes[i];
-                const age = time - boxes[i].timeOfCreation;
-                if(box.pos[1] - 3 * age > 0.5)
-                    box.pos[1] -= 3 * age;
-                else
-                    box.pos[1] = 0.5;
-            pushMatrix();
-                Box(box);
-            popMatrix();
-        }
-    }
-
     // FULL SCENE ______________________________________________________________
 
     function FullScene()
     { 
-         //por a frente apontada para z positivo. a frente estava apontada para x negativo.
-        multRotationY(90); 
         pushMatrix();
             City();
         popMatrix();
@@ -611,49 +618,38 @@ function setup(shaders)
                 boxes.shift();
     }
 
-    function drop()
-    {
-        const boxPos = [0, heli.ascension, -25];
-        let box = {pos: boxPos, timeOfCreation: time, trajectory: heli.trajectory}; 
-      //  let box = {pos: heliPos, timeOfCreation: time};
-        boxes.push(box);
-        console.log(boxes);
-    }
+
 
     function enactProjection()
     {
         switch(projectionState){
             case 1:
-                frontView();
-                multRotationX(gammaSlider.value);
-                multRotationY(thetaSlider.value);                
+                mView = mult(frontView(), mult(rotateX(gammaSlider.value), rotateY(thetaSlider.value)));           
                 showSliders();
                 break;
             case 2:
-                frontView();
+                mView = frontView();
                 hideSliders();
                 break;
             case 3:
-                frontView();
-                multRotationX(90);
+                mView = mult(frontView(), rotateX(90));
                 hideSliders();
                 break;
             case 4:
-                frontView();
-                multRotationY(-90);
+                mView = mult(frontView(), rotateY(-90));
                 hideSliders();
                 break;
             case 5:
-                loadMatrix(lookAt(heliPos, [0,0,0], [0,1,0]));
+            //    loadMatrix(lookAt(heliPos, [0,0,0], [0,1,0]));
                 hideSliders();
                 break;
         }
+        loadMatrix(mView);
     }
 
     function frontView()
     {
-        mView = lookAt([0,0,VP_DISTANCE],[0,0,0],[0,1,0]);
-        loadMatrix(mView);
+        return lookAt([0,0,VP_DISTANCE],[0,0,0],[0,1,0]);
     }
 
     function hideSliders()
@@ -664,7 +660,7 @@ function setup(shaders)
     function showSliders()
     {
         document.getElementById("sliders").style.display = "block";
-     /*   console.log(thetaSlider.value);
+      /*  console.log(thetaSlider.value);
         console.log(gammaSlider.value); */
     }
 }
