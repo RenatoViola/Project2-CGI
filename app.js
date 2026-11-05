@@ -1,12 +1,12 @@
-import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
-import { ortho, lookAt, flatten, inverse, mult, rotateX, rotateY, rotateZ} from "../../libs/MV.js";
-import {modelView, loadMatrix, multRotationX, multRotationY, multRotationZ, multScale, pushMatrix, popMatrix, multTranslation } from "../../libs/stack.js";
+import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "./libs/utils.js";
+import { ortho, lookAt, flatten, inverse, mult, rotateX, rotateY, rotateZ} from "./libs/MV.js";
+import {modelView, loadMatrix, multRotationX, multRotationY, multRotationZ, multScale, pushMatrix, popMatrix, multTranslation } from "./libs/stack.js";
 
-import * as SPHERE from '../../libs/objects/sphere.js';
-import * as CYLINDER from '../../libs/objects/cylinder.js';
-import * as CUBE from '../../libs/objects/cube.js';
-import * as PYRAMID from '../../libs/objects/pyramid.js';
-import * as TORUS from '../../libs/objects/torus.js';
+import * as SPHERE from './libs/objects/sphere.js';
+import * as CYLINDER from './libs/objects/cylinder.js';
+import * as CUBE from './libs/objects/cube.js';
+import * as PYRAMID from './libs/objects/pyramid.js';
+import * as TORUS from './libs/objects/torus.js';
 
 /** @type WebGLRenderingContext */
 let gl;
